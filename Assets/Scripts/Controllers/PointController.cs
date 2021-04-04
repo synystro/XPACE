@@ -6,18 +6,18 @@ namespace XPACE {
 
     public class PointController : MonoBehaviour {
 
-        [SerializeField] InputController ownerPlayer;
         Button button;
 
         private void Start() {
             button = this.GetComponent<Button>();
             button.onClick.AddListener(Select);
-            GameObject ownerPlayerGO = UiManager.instance.GetOwnerPlayer();
-            ownerPlayer = ownerPlayerGO.GetComponent<InputController>();
         }
 
-        void Select() {                  
-            print("point " + this.gameObject.name + " selected");
+        void Select() {  
+            if(UiManager.instance.OwnerPlayer == null) {
+                return;
+            }        
+            InputController ownerPlayer = UiManager.instance.OwnerPlayer.GetComponent<InputController>();
             ownerPlayer.PlaceStructure(StructureType.MiningStation, this.transform.position.x, this.transform.position.y); 
         } 
 

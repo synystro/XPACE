@@ -10,7 +10,7 @@ namespace XPACE {
             if (GameController.instance == null) {
                     Debug.LogError("GameController instance not found!");
             } else {
-                    GameController.instance.StartGame();
+                    GameController.instance.SetupGame();
                     colors = new Stack<string>();
                     colors.Push("Yellow");
                     colors.Push("Green");
@@ -44,9 +44,10 @@ namespace XPACE {
             GameObject player = Instantiate(playerPrefab);
             PlayerData playerData = player.GetComponent<PlayerData>();
             playerData.SetName(colors.Pop());
-            //player.name = playerData.Color;
             Debug.Log(msg.content);
             NetworkServer.AddPlayerForConnection(conn, player);
+            // add player to list of players
+            GameController.instance.AddPlayer(player);
         }
     }
 }

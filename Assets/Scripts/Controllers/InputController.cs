@@ -10,21 +10,57 @@ namespace XPACE {
         void Update() {
             if(!isLocalPlayer)
                 return;
-            if(Input.GetKey(KeyCode.X)) {
-                ChangeColor();
-            }
         }
+        [TargetRpc]
+        public void RpcStartTurn() {
+            UiManager.instance.SetRollButton(true);
+            UiManager.instance.SetPointsParent(true);
+        }
+        [TargetRpc]
+        public void RpcStartPlanningPhase() {
+            UiManager.instance.SetRollButton(false);
+            UiManager.instance.SetTradeButton(true);                        
+        }
+        [Command]
+        public void EndTurn() {
+            TurnManager.instance.EndTurn();
+        }
+        [TargetRpc]
+        public void RpcEndTurn() {
+            UiManager.instance.SetPointsParent(false);
+            UiManager.instance.SetTradeButton(false); 
+        }
+        bool IsMyTurn() {
+            if(TurnManager.instance.activePlayer != this.gameObject)
+                return false;
+            return true;
+        }
+        public void RollDice() {
+            CmdRollDice();
+        }
+        [Command]
+        private void CmdRollDice() {
+            if(IsMyTurn() == false) {
+                return;
+            }
+            TurnManager.instance.RollDice();
+        }
+        public void Trade() {
+            CmdTrade();
+        }
+        [Command]
+        private void CmdTrade() {
+            if(IsMyTurn() == false) {
+                return;
+            }
+            TurnManager.instance.EndTurn();
+        }          
         public void PlaceStructure(StructureType type, float posX, float posY) {
             CmdPlaceStructure(type, posX, posY);
         }
         [Command]
-        private void ChangeColor() {
-            this.GetComponent<PlayerData>().SetName("Black");
-        }
-        [Command]
         private void CmdPlaceStructure(StructureType type, float posX, float posY) {
-            if(GameController.instance.activePlayer != this.gameObject) {
-                print("not " + this.gameObject.name + "'s turn.");
+            if(IsMyTurn() == false) {
                 return;
             }
             // register event

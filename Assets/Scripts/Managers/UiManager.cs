@@ -8,10 +8,23 @@ namespace XPACE {
                 instance = this;
         }
         [SerializeField] private GameObject ownerPlayer;
-        public GameObject GetOwnerPlayer() { return ownerPlayer; }
+        [SerializeField] private GameObject pointsParent;
+        [SerializeField] private GameObject rollButton;
+        [SerializeField] private GameObject tradeButton;
 
-        private void Start() {
-            //this.transform.parent = null;
+        public GameObject OwnerPlayer => ownerPlayer;
+
+        public void SetOwnerPlayer(GameObject player) {
+            ownerPlayer = player;          
+        }
+        public void SetPointsParent(bool state) {
+            pointsParent.SetActive(state);
+        }
+        public void SetRollButton(bool state) {
+            rollButton.SetActive(state);
+        }
+        public void SetTradeButton(bool state) {
+            tradeButton.SetActive(state);
         }
     }
 }
