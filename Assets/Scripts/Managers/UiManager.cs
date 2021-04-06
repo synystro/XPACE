@@ -7,6 +7,7 @@ namespace XPACE {
             if (instance == null)
                 instance = this;
         }
+        [SerializeField] private GameObject notificationPanel;
         [SerializeField] private GameObject ownerPlayer;
         [SerializeField] private GameObject pointsParent;
         [SerializeField] private GameObject rollButton;
@@ -16,6 +17,9 @@ namespace XPACE {
 
         public void SetOwnerPlayer(GameObject player) {
             ownerPlayer = player;          
+        }
+        public void SetNotificationPanel(bool state) {
+            notificationPanel.SetActive(state);
         }
         public void SetPointsParent(bool state) {
             pointsParent.SetActive(state);

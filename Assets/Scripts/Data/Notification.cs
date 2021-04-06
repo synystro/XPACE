@@ -1,7 +1,7 @@
 ﻿using Mirror;
 
 namespace XPACE {
-    public struct Notification : NetworkMessage {       
+    public class Notification : NetworkMessage {       
         public string content;         
     }
 }

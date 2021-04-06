@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 namespace XPACE {
+    public enum ResourceType { Empty, Iron, Silicon, Uranium, Crops, Water }
 
     public class ResourceController : NetworkBehaviour {
 
@@ -31,6 +32,12 @@ namespace XPACE {
 
         private int resAmount;
         private int emptyTilesAmount;
+
+        public static ResourceController instance;
+        private void Awake() {
+            if (instance == null)
+                instance = this;          
+        }
 
         [TargetRpc]
         public void TargetRefreshAllTiles(NetworkConnection conn) {
@@ -66,7 +73,7 @@ namespace XPACE {
             emptyTilesAmount = Tiles.Length - resAmount;
 
             SetEmptyTiles();
-            DistributeResources();
+            ShuffleResourcesOnTiles();
 
             IsGenerated = true;
         }
@@ -80,15 +87,15 @@ namespace XPACE {
             while (emptyTilesLeft > 0) {
                 int randomTileN = UnityEngine.Random.Range(0, availableTiles.Count);
                 Tile randomTile = availableTiles[randomTileN];
-                if (randomTile.Resource == null) {
-                    randomTile.SetResource("empty");
+                if (randomTile.Resource == (int)ResourceType.Empty) {
+                    randomTile.SetResource(ResourceType.Empty);
                     availableTiles.Remove(randomTile);
                     emptyTilesLeft--;
                 }
             }
         }
         [Server]
-        void DistributeResources() {
+        void ShuffleResourcesOnTiles() {
             List<int> numbersLeft = new List<int>();
             for (int i = 0; i < numbers.Length; i++)
                 numbersLeft.Add(numbers[i]);
@@ -98,19 +105,19 @@ namespace XPACE {
                 Tile randomTile = availableTiles[randomTileN];
 
                 if (water > 0) {
-                    randomTile.SetResource("water");
+                    randomTile.SetResource(ResourceType.Water);
                     water--;
                 } else if (crops > 0) {
-                    randomTile.SetResource("crops");
+                    randomTile.SetResource(ResourceType.Crops);
                     crops--;
                 } else if (iron > 0) {
-                    randomTile.SetResource("iron");
+                    randomTile.SetResource(ResourceType.Iron);
                     iron--;
                 } else if (silicon > 0) {
-                    randomTile.SetResource("silicon");
+                    randomTile.SetResource(ResourceType.Silicon);
                     silicon--;
                 } else if (uranium > 0) {
-                    randomTile.SetResource("uranium");
+                    randomTile.SetResource(ResourceType.Uranium);
                     uranium--;
                 }
 
@@ -124,7 +131,26 @@ namespace XPACE {
             }
             onTilesChanged?.Invoke();
         }
-
+        public bool DistributeResourcesForTiles(int tileNumber) {
+            bool wasGiven = false;
+            // loop through all tiles to find the ones with the desired number
+            foreach (Tile t in Tiles) {
+                if (t.Number == tileNumber) {
+                    int resourceToGive = t.Resource;
+                    if (t.OwnerToAmount.Count > 0) {
+                        foreach (KeyValuePair<string, int> entry in t.OwnerToAmount) {
+                            foreach (GameObject player in GameController.instance.Players) {
+                                if (player.name == entry.Key.ToString()) {
+                                    player.GetComponent<InventoryController>().AddResource((ResourceType)resourceToGive, entry.Value);
+                                    wasGiven = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return wasGiven;
+        }
     }
 
 }

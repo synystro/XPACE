@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace XPACE {
+namespace XPACE {      
     public class GameController : MonoBehaviour {
-        private List<GameObject> players;
+        public Stack<string> Colors;
+        private List<GameObject> players;        
         public List<GameObject> Players => players;
 
         public static GameController instance;
@@ -13,11 +14,14 @@ namespace XPACE {
             players = new List<GameObject>();            
         }        
         public void SetupGame() {
+            // define colors
+            SetupNamesAndColors();
             // generate random map
             if (MapManager.instance == null) {
                 Debug.LogError("MapManager instance not found!");
             } else {
-                StartMap();
+                // start map generation
+                StartMap();                
             }
         }
         public void AddPlayer(GameObject player) {
@@ -26,14 +30,24 @@ namespace XPACE {
             } else {
                 Debug.LogWarning("Player is already inside list of players!");
             }
+        }
+        private void SetupNamesAndColors() {   
+            Colors = new Stack<string>();
+            Colors.Push(Constants.COLOR_YELLOW);
+            Colors.Push(Constants.COLOR_GREEN);
+            Colors.Push(Constants.COLOR_RED);
+            Colors.Push(Constants.COLOR_BLUE);
         }            
         [ContextMenu("Start the game")]
         private void StartGame() {
             // shuffle players list
             IListExtensions.Shuffle<GameObject>(players);
-            print($"first player rolled to {players[0]}");
+            //FIXME in the future, make this start all ui components necessary when game starts
+            foreach(GameObject player in Players) {
+                player.GetComponent<InputController>().RpcSetNotificationPanel(true);
+            }  
             // initialise turn manager
-            TurnManager.instance.Init();            
+            TurnManager.instance.Init();                       
         }        
         void StartMap() {
             MapManager.instance.GenerateMap();
